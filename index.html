@@ -3,5 +3,21 @@
 <body>
 <h1>Hello World</h1>
 <p>I'm hosted with GitHub Pages.</p>
+  <script>
+      (function(d,t) {
+        var BASE_URL="https://chat-4731-687786a9e7a44d11000001f7.metaart.ubos.tech";
+        var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=BASE_URL+"/packs/js/sdk.js";
+        g.defer = true;
+        g.async = true;
+        s.parentNode.insertBefore(g,s);
+        g.onload=function(){
+          window.chatwootSDK.run({
+            websiteToken: 'FEeQbzVXNpJvEyyie6sUBjGA',
+            baseUrl: BASE_URL
+          })
+        }
+      })(document,"script");
+    </script>
 </body>
 </html>
