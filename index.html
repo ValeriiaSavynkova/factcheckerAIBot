@@ -4,20 +4,50 @@
 <h1>Hello World</h1>
 <p>I'm hosted with GitHub Pages.</p>
  <script>
-      (function(d,t) {
-        var BASE_URL="https://uboschat-0560-6853c95aeeba351100000026.ubos-uiuvq.ubos.tech";
-        var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-        g.src=BASE_URL+"/packs/js/sdk.js";
-        g.defer = true;
-        g.async = true;
-        s.parentNode.insertBefore(g,s);
-        g.onload=function(){
-          window.chatwootSDK.run({
-            websiteToken: 'cBSHqdL1pE2jEbGm3Hiqqa9g',
-            baseUrl: BASE_URL
-          })
-        }
-      })(document,"script");
-    </script>
+(function(d,t){
+  var BASE_URL="https://uboschat-0560-6853c95aeeba351100000026.ubos-uiuvq.ubos.tech";
+  var g=d.createElement(t), s=d.getElementsByTagName(t)[0];
+  g.src=BASE_URL+"/packs/js/sdk.js";
+  g.defer = true; g.async = true;
+  s.parentNode.insertBefore(g,s);
+  g.onload=function(){
+    window.chatwootSDK.run({
+      websiteToken: 'cBSHqdL1pE2jEbGm3Hiqqa9g',
+      baseUrl: BASE_URL
+    });
+
+    // ждём пока появится window.$chatwoot
+    window.addEventListener('chatwoot:ready', function () {
+      // helper: то, что нужно выполнить по сигналу
+      window.forceNewChatwootConversation = function () {
+        try { window.$chatwoot && window.$chatwoot.reset(); } catch(e) {}
+      };
+
+      // уникальный id этой вкладки
+      const sidKey = 'cw_client_session';
+      const sid = localStorage.getItem(sidKey) || (crypto.randomUUID ? crypto.randomUUID() : (Date.now()+'-'+Math.random()));
+      localStorage.setItem(sidKey, sid);
+
+      // сохраним sid в контакте, чтобы видеть его на сервере (атрибут должен существовать в Chatwoot → Settings → Custom Attributes → Contact)
+      if (window.$chatwoot?.setCustomAttributes) {
+        window.$chatwoot.setCustomAttributes({ cw_session: sid });
+      }
+
+      // подключаемся к WebSocket Node-RED (см. ниже шаг 2)
+      const ws = new WebSocket('wss://<ТВОЙ_ДОМЕН_NODE_RED>/ws/cw'); // пример: wss://nodered.example.com/ws/cw
+      ws.onopen = () => ws.send(JSON.stringify({type:'hello', sid}));
+      ws.onmessage = (e) => {
+        try {
+          const m = JSON.parse(e.data);
+          if (m && m.type === 'reset' && m.sid === sid) {
+            window.forceNewChatwootConversation();
+          }
+        } catch(_) {}
+      };
+    });
+  };
+})(document,"script");
+</script>
+
 </body>
 </html>
