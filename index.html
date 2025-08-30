@@ -3,51 +3,72 @@
 <body>
 <h1>Hello World</h1>
 <p>I'm hosted with GitHub Pages.</p>
- <script>
+<script>
 (function(d,t){
   var BASE_URL="https://uboschat-0560-6853c95aeeba351100000026.ubos-uiuvq.ubos.tech";
-  var g=d.createElement(t), s=d.getElementsByTagName(t)[0];
-  g.src=BASE_URL+"/packs/js/sdk.js";
-  g.defer = true; g.async = true;
-  s.parentNode.insertBefore(g,s);
+  var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+  g.src=BASE_URL+"/packs/js/sdk.js"; g.defer=true; g.async=true; s.parentNode.insertBefore(g,s);
   g.onload=function(){
-    window.chatwootSDK.run({
-      websiteToken: 'cBSHqdL1pE2jEbGm3Hiqqa9g',
-      baseUrl: BASE_URL
-    });
+    window.chatwootSDK.run({ websiteToken:'cBSHqdL1pE2jEbGm3Hiqqa9g', baseUrl: BASE_URL });
 
-    // ждём пока появится window.$chatwoot
-    window.addEventListener('chatwoot:ready', function () {
-      // helper: то, что нужно выполнить по сигналу
-      window.forceNewChatwootConversation = function () {
-        try { window.$chatwoot && window.$chatwoot.reset(); } catch(e) {}
-      };
-
-      // уникальный id этой вкладки
-      const sidKey = 'cw_client_session';
-      const sid = localStorage.getItem(sidKey) || (crypto.randomUUID ? crypto.randomUUID() : (Date.now()+'-'+Math.random()));
-      localStorage.setItem(sidKey, sid);
-
-      // сохраним sid в контакте, чтобы видеть его на сервере (атрибут должен существовать в Chatwoot → Settings → Custom Attributes → Contact)
-      if (window.$chatwoot?.setCustomAttributes) {
-        window.$chatwoot.setCustomAttributes({ cw_session: sid });
-      }
-
-      // подключаемся к WebSocket Node-RED (см. ниже шаг 2)
-      const ws = new WebSocket('wss://<ТВОЙ_ДОМЕН_NODE_RED>/ws/cw'); // пример: wss://nodered.example.com/ws/cw
-      ws.onopen = () => ws.send(JSON.stringify({type:'hello', sid}));
-      ws.onmessage = (e) => {
-        try {
-          const m = JSON.parse(e.data);
-          if (m && m.type === 'reset' && m.sid === sid) {
-            window.forceNewChatwootConversation();
-          }
-        } catch(_) {}
-      };
+    window.addEventListener('chatwoot:ready', () => {
+      addVoiceButton();
     });
   };
-})(document,"script");
+
+  function addVoiceButton(){
+    const btn = document.createElement('button');
+    btn.id = 'cw-voice-btn';
+    btn.style.cssText = `
+      position: fixed; right: 24px; bottom: 96px; z-index: 2147483647;
+      width: 56px; height: 56px; border-radius: 50%; border: none;
+      box-shadow: 0 8px 24px rgba(0,0,0,.2); cursor: pointer; font-size: 22px;
+    `;
+    btn.title = 'Record voice message';
+    btn.textContent = '🎤';
+    btn.onclick = toggleRecording;
+    document.body.appendChild(btn);
+  }
+
+  let mediaRecorder, chunks = [], isRecording = false;
+
+  async function toggleRecording(){
+    const btn = document.getElementById('cw-voice-btn');
+    if(!isRecording){
+      try{
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        chunks = [];
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' }); // webm/ogg — ОК для браузеров
+        mediaRecorder.ondataavailable = e => e.data.size && chunks.push(e.data);
+        mediaRecorder.onstop = async () => {
+          const blob = new Blob(chunks, { type: 'audio/webm' });
+          await uploadVoice(blob); 
+        };
+        mediaRecorder.start();
+        isRecording = true; btn.textContent = '⏹️';
+      }catch(err){
+        alert('Немає зв'язку з мікрофоном');
+        console.error(err);
+      }
+    }else{
+      mediaRecorder?.stop();
+      isRecording = false; btn.textContent = '🎤';
+    }
+  }
+
+  async function uploadVoice(blob){
+    const fd = new FormData();
+    fd.append('file', new File([blob], `voice-${Date.now()}.webm`, { type: 'audio/webm' }));
+    try{
+      await fetch('/voice-upload', { method: 'POST', body: fd, credentials: 'include' });
+    }catch(e){
+      console.error(e);
+      alert('Error');
+    }
+  }
+})(document,'script');
 </script>
+
 
 </body>
 </html>
