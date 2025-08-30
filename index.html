@@ -38,7 +38,7 @@
       try{
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         chunks = [];
-        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' }); // webm/ogg — ОК для браузеров
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' }); 
         mediaRecorder.ondataavailable = e => e.data.size && chunks.push(e.data);
         mediaRecorder.onstop = async () => {
           const blob = new Blob(chunks, { type: 'audio/webm' });
@@ -47,7 +47,7 @@
         mediaRecorder.start();
         isRecording = true; btn.textContent = '⏹️';
       }catch(err){
-        alert('Немає зв'язку з мікрофоном');
+        alert(`Немає зв'язку з мікрофоном`);
         console.error(err);
       }
     }else{
