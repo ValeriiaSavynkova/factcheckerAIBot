@@ -2,72 +2,22 @@
 <html>
 <body>
 <h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
 <script>
-(function(d,t){
-  var BASE_URL="https://uboschat-0560-6853c95aeeba351100000026.ubos-uiuvq.ubos.tech";
-  var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-  g.src=BASE_URL+"/packs/js/sdk.js"; g.defer=true; g.async=true; s.parentNode.insertBefore(g,s);
-  g.onload=function(){
-    window.chatwootSDK.run({ websiteToken:'cBSHqdL1pE2jEbGm3Hiqqa9g', baseUrl: BASE_URL });
-
-    window.addEventListener('chatwoot:ready', () => {
-      addVoiceButton();
-    });
-  };
-
-  function addVoiceButton(){
-    const btn = document.createElement('button');
-    btn.id = 'cw-voice-btn';
-    btn.style.cssText = `
-      position: fixed; right: 24px; bottom: 96px; z-index: 2147483647;
-      width: 56px; height: 56px; border-radius: 50%; border: none;
-      box-shadow: 0 8px 24px rgba(0,0,0,.2); cursor: pointer; font-size: 22px;
-    `;
-    btn.title = 'Record voice message';
-    btn.textContent = '🎤';
-    btn.onclick = toggleRecording;
-    document.body.appendChild(btn);
-  }
-
-  let mediaRecorder, chunks = [], isRecording = false;
-
-  async function toggleRecording(){
-    const btn = document.getElementById('cw-voice-btn');
-    if(!isRecording){
-      try{
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        chunks = [];
-        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' }); 
-        mediaRecorder.ondataavailable = e => e.data.size && chunks.push(e.data);
-        mediaRecorder.onstop = async () => {
-          const blob = new Blob(chunks, { type: 'audio/webm' });
-          await uploadVoice(blob); 
-        };
-        mediaRecorder.start();
-        isRecording = true; btn.textContent = '⏹️';
-      }catch(err){
-        alert(`Немає зв'язку з мікрофоном`);
-        console.error(err);
-      }
-    }else{
-      mediaRecorder?.stop();
-      isRecording = false; btn.textContent = '🎤';
-    }
-  }
-
-  async function uploadVoice(blob){
-    const fd = new FormData();
-    fd.append('file', new File([blob], `voice-${Date.now()}.webm`, { type: 'audio/webm' }));
-    try{
-      await fetch('/voice-upload', { method: 'POST', body: fd, credentials: 'include' });
-    }catch(e){
-      console.error(e);
-      alert('Error');
-    }
-  }
-})(document,'script');
-</script>
+      (function(d,t) {
+        var BASE_URL="https://uboschat-0560-6853c95aeeba351100000026.ubos-uiuvq.ubos.tech";
+        var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=BASE_URL+"/packs/js/sdk.js";
+        g.defer = true;
+        g.async = true;
+        s.parentNode.insertBefore(g,s);
+        g.onload=function(){
+          window.chatwootSDK.run({
+            websiteToken: 'cBSHqdL1pE2jEbGm3Hiqqa9g',
+            baseUrl: BASE_URL
+          })
+        }
+      })(document,"script");
+    </script>
 
 
 </body>
