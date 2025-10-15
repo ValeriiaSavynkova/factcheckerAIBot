@@ -1,23 +1,64 @@
 <!DOCTYPE html>
 <html>
-<body>
-<h1>Hello World</h1>
-<script>
-      (function(d,t) {
-        var BASE_URL="https://uboschat-4382-68e1c21ad94e811100000001.ubos-ksbve.ubos.tech";
-        var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-        g.src=BASE_URL+"/packs/js/sdk.js";
+  <body>
+    <h1>Hello World</h1>
+
+    <button id="ask-btn" data-text="привіт">Кнопка</button>
+
+    <script>
+      (function (d, t) {
+        var BASE_URL = "https://uboschat-4382-68e1c21ad94e811100000001.ubos-ksbve.ubos.tech";
+        var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
+        g.src = BASE_URL + "/packs/js/sdk.js";
         g.async = true;
-        s.parentNode.insertBefore(g,s);
-        g.onload=function(){
+        s.parentNode.insertBefore(g, s);
+        g.onload = function () {
           window.chatwootSDK.run({
-            websiteToken: 'A74jUhxecnBMKhCzCaKz4CAQ',
+            websiteToken: "A74jUhxecnBMKhCzCaKz4CAQ",
             baseUrl: BASE_URL
-          })
+          });
+        };
+      })(document, "script");
+
+      // ждём, пока SDK готов
+      window.addEventListener("chatwoot:ready", function () {
+        const btn = document.getElementById("ask-btn");
+
+        const IDENT_KEY = "cw_identifier";
+        let identifier = localStorage.getItem(IDENT_KEY);
+        if (!identifier) {
+          identifier = "web-" + Math.random().toString(36).slice(2);
+          localStorage.setItem(IDENT_KEY, identifier);
         }
-      })(document,"script");
+
+        btn.addEventListener("click", async () => {
+          const text = btn.dataset.text || btn.innerText;
+
+          window.$chatwoot.toggle("open");
+
+          window.$chatwoot.setUser(identifier, {
+            name: "Website visitor",
+          });
+
+          try {
+            await fetch(`${BASE_URL}/chatwoot/push-button-message`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                identifier,                
+                content: text              
+              })
+            });
+          } catch (e) {
+            console.error("Failed to send message via backend:", e);
+          }
+        });
+      });
+
+      window.addEventListener("chatwoot:on-message", function (e) {
+        // console.log("CW message:", e.detail);
+      });
     </script>
-
-
-</body>
+  </body>
 </html>
+
