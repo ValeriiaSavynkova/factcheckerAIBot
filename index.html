@@ -22,25 +22,21 @@
 
       // ждём, пока SDK готов
       window.addEventListener("chatwoot:ready", function () {
-        const btn = document.getElementById("ask-btn");
-
         const IDENT_KEY = "cw_identifier";
         let identifier = localStorage.getItem(IDENT_KEY);
         if (!identifier) {
           identifier = "web-" + Math.random().toString(36).slice(2);
           localStorage.setItem(IDENT_KEY, identifier);
         }
+        
+        window.$chatwoot.setUser(identifier, {
+            name: "Website visitor",
+          });
+        const btn = document.getElementById("ask-btn");
 
         btn.addEventListener("click", async () => {
           const text = btn.dataset.text || btn.innerText;
-
-          window.$chatwoot.toggle("open");
-
-          window.$chatwoot.setUser(identifier, {
-            name: "Website visitor",
-          });
-
-          try {
+               try {
             await fetch(`https://aibotv3-nr-5728-68e1c21ad94e811100000001.ubos-ksbve.ubos.tech/chatwoot/push-button-message`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -49,6 +45,8 @@
                 content: text              
               })
             });
+           window.$chatwoot.toggle("open");
+
           } catch (e) {
             console.error("Failed to send message via backend:", e);
           }
