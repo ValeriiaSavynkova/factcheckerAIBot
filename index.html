@@ -2,8 +2,6 @@
 <html>
   <body>
     <h1>Hello World</h1>
-    <button id="ask-btn" data-text="привіт">Кнопка</button>
-
    
 <script>
       (function(d,t) {
@@ -20,19 +18,6 @@
         }
       })(document,"script");
      </script>
-    <script>
-  const btn = document.getElementById("ask-btn");
-
-  function openWidgetOnce() {
-    window.$chatwoot && window.$chatwoot.toggle("open");
-  }
-
-  window.chatwootSDK && window.chatwootSDK.on && window.chatwootSDK.on("ready", function () {
-    btn.addEventListener("click", () => {
-      openWidgetOnce();
-    });
-  });
-</script>
   </body>
 </html>
 
