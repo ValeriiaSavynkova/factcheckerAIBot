@@ -2,6 +2,7 @@
 <html>
   <body>
     <h1>Hello World</h1>
+    <button id="ask-btn" data-text="привіт">Кнопка</button>
 
    
 <script>
@@ -18,6 +19,20 @@
           })
         }
       })(document,"script");
+
+  const btn = document.getElementById("ask-btn");
+
+        btn.addEventListener("click", async () => {
+          const text = btn.dataset.text || btn.innerText;
+               try {
+  
+           window.$chatwoot.toggle("open");
+
+          } catch (e) {
+            console.error("Failed to send message via backend:", e);
+          }
+        });
+      });
     </script>
   </body>
 </html>
