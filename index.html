@@ -12,6 +12,11 @@
   <button class="cw-btn" onclick="openChatwoot('Як тебе звати?')">Як тебе звати?</button>
 </div>
 <script>
+
+  const BASE_URL = "https://uboschat-4382-68e1c21ad94e811100000001.ubos-ksbve.ubos.tech";
+  const WEBSITE_TOKEN = "A74jUhxecnBMKhCzCaKz4CAQ";
+  const LOCALE = "uk";
+  
   function getCookie(name) {
     const m = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([$?*|{}\]\\^])/g, '\\$1') + '=([^;]*)'));
     return m ? decodeURIComponent(m[1]) : null;
@@ -62,31 +67,39 @@ function waitForChatwootReady({ timeout = 10000 } = {}) {
 
     return cw;
   }
-
+ async function sendIncomingMessageViaWidgetAPI({ baseUrl, websiteToken, cwConversation, text, locale = 'en' }) {
+        const url = `${baseUrl}/api/v1/widget/messages?website_token=${encodeURIComponent(websiteToken)}&cw_conversation=${encodeURIComponent(cwConversation)}&locale=${encodeURIComponent(locale)}`;
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'X-Auth-Token': cwConversation,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: { content: String(text || '') } }),
+        });
+        if (!resp.ok) {
+          const t = await resp.text().catch(() => '');
+          throw new Error(`Widget API error: ${resp.status} ${t}`);
+        }
+        return resp;
+      }
   async function openChatwoot(messageText) {
     try {
       const cw = await ensureConversationCookie();
-
-      // 2) шлём в Node-RED
-      const resp = await fetch(
-        'https://aibotv3-nr-5728-68e1c21ad94e811100000001.ubos-ksbve.ubos.tech/send-message',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ cw_conversation: cw, text: String(messageText || '') }),
-        }
-      );
-
-    if (resp.status !== 200) {
-        const text = await resp.text().catch(() => '');
-        throw new Error(`The service returned error`);
-      }
+      
+      await sendIncomingMessageViaWidgetAPI({
+            baseUrl: BASE_URL,
+            websiteToken: WEBSITE_TOKEN,
+            cwConversation: cw,
+            text: messageText,
+            locale: LOCALE,
+          });
 
       await waitForChatwootReady();
       window.$chatwoot.toggle('open');
 
     } catch (err) {
-      console.error('Chain failed (cookie → POST → open):', err);
+      console.error('Chain failed (cookie → POST widget  → open):', err);
       if (window.$chatwoot && typeof window.$chatwoot.toggle === 'function') {
         window.$chatwoot.toggle('open');
       }
@@ -107,6 +120,19 @@ function waitForChatwootReady({ timeout = 10000 } = {}) {
         }
       })(document,"script");
      </script>
+
+     <style>
+      .cw-btn {
+        padding: 10px 16px;
+        margin: 6px 8px 0 0;
+        border: 0;
+        border-radius: 8px;
+        cursor: pointer;
+        font: 600 16px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        background: #2f6fec; color: #fff;
+      }
+      .cw-btn:hover { opacity: 0.9; }
+    </style>
   </body>
 </html>
 
