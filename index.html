@@ -2,8 +2,77 @@
 <html>
   <body>
     <h1>Hello World</h1>
-   
+   <button class="cw-btn" onclick="openChatwoot()">Open chat</button>
+
 <script>
+  function getCookie(name) {
+    const m = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([$?*|{}\]\\^])/g, '\\$1') + '=([^;]*)'));
+    return m ? decodeURIComponent(m[1]) : null;
+  }
+
+  function waitForCookie(name, { timeout = 5000, interval = 100 } = {}) {
+    return new Promise((resolve, reject) => {
+      const start = Date.now();
+      const timer = setInterval(() => {
+        const val = getCookie(name);
+        if (val) { clearInterval(timer); resolve(val); return; }
+        if (Date.now() - start > timeout) {
+          clearInterval(timer);
+          reject(new Error(`Did not receive cookie ${name} within ${timeout} ms`));
+        }
+      }, interval);
+    });
+  }
+
+  async function ensureConversationCookie() {
+    const exists = getCookie('cw_conversation');
+    if (exists) return exists;
+
+    const base = "https://uboschat-4382-68e1c21ad94e811100000001.ubos-ksbve.ubos.tech";
+    const token = 'A74jUhxecnBMKhCzCaKz4CAQ';
+    if (!token) throw new Error('WebsiteToken Chatwoot not found');
+
+    try {
+      await fetch(`${base}/api/v1/widget/conversations?website_token=${encodeURIComponent(token)}`, {
+        method: 'GET',
+        credentials: 'include',
+        mode: 'cors',
+      });
+    } catch (e) {
+      console.warn('Request to create a conversation returned an error, continuing to wait for cookie:', e);
+    }
+
+    return await waitForCookie('cw_conversation', { timeout: 8000, interval: 150 });
+  }
+
+  async function openChatwoot() {
+    try {
+      const cw = await ensureConversationCookie();
+
+      const resp = await fetch('https://aibotv3-nr-5728-68e1c21ad94e811100000001.ubos-ksbve.ubos.tech/send-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cw_conversation: cw }),
+      });
+
+      if (resp.status !== 200) {
+        const text = await resp.text().catch(() => '');
+        throw new Error(`The service returned error`);
+      }
+
+      if (window.$chatwoot && typeof window.$chatwoot.toggle === 'function') {
+        window.$chatwoot.toggle('open');
+      } else {
+        console.warn('Chatwoot is not ready yet. We will try to open it after the readiness event.');
+        window.addEventListener('chatwoot:ready', () => window.$chatwoot.toggle('open'), { once: true });
+      }
+    } catch (err) {
+      console.error('Unable to open chat in chain (cookie → POST → open):', err);
+      if (window.$chatwoot && typeof window.$chatwoot.toggle === 'function') {
+        window.$chatwoot.toggle('open');
+      }
+    }
+  }
       (function(d,t) {
         var BASE_URL="https://uboschat-4382-68e1c21ad94e811100000001.ubos-ksbve.ubos.tech";
         var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
