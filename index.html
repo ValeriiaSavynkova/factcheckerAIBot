@@ -74,7 +74,9 @@ function waitForChatwootReady({ timeout = 10000 } = {}) {
         throw new Error(`The service returned error: ${resp.status}`);
      } 
      await waitForChatwootReady(); 
-     window.$chatwoot.toggle('open'); 
+    window.$chatwoot.toggle('open');
+    window.$chatwoot.toggle('close');
+    window.$chatwoot.toggle('open'); 
    } catch (err) { 
      console.error('Chain failed (cookie → POST → open):', err); 
      if (window.$chatwoot && typeof window.$chatwoot.toggle === 'function') { 
