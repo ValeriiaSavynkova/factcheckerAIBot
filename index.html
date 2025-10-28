@@ -71,8 +71,7 @@ function waitForChatwootReady({ timeout = 10000 } = {}) {
                                body: JSON.stringify({ cw_conversation: cw, text: String(messageText || '') }), 
                               } ); 
      if (resp.status !== 200) { 
-       const text = await resp.text().catch(() => ''); 
-       throw new Error(The service returned error); 
+        throw new Error(`The service returned error: ${resp.status}`);
      } 
      await waitForChatwootReady(); 
      window.$chatwoot.toggle('open'); 
