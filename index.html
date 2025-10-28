@@ -23,56 +23,69 @@
       }, interval);
     });
   }
+function waitForChatwootReady({ timeout = 10000 } = {}) {
+    return new Promise((resolve, reject) => {
+      if (window.$chatwoot && typeof window.$chatwoot.toggle === 'function') return resolve();
+      const onReady = () => { window.removeEventListener('chatwoot:ready', onReady); resolve(); };
+      window.addEventListener('chatwoot:ready', onReady, { once: true });
+      setTimeout(() => {
+        window.removeEventListener('chatwoot:ready', onReady);
+        reject(new Error('chatwoot:ready timeout'));
+      }, timeout);
+    });
+  }
 
   async function ensureConversationCookie() {
-    const exists = getCookie('cw_conversation');
-    if (exists) return exists;
+    const existing = getCookie('cw_conversation');
+    if (existing) return existing;
 
-    const base = "https://uboschat-4382-68e1c21ad94e811100000001.ubos-ksbve.ubos.tech";
-    const token = 'A74jUhxecnBMKhCzCaKz4CAQ';
-    if (!token) throw new Error('WebsiteToken Chatwoot not found');
+    await waitForChatwootReady();
 
     try {
-      await fetch(`${base}/api/v1/widget/conversations?website_token=${encodeURIComponent(token)}`, {
-        method: 'GET',
-        credentials: 'include',
-        mode: 'cors',
-      });
+      window.$chatwoot.toggle('open');
     } catch (e) {
-      console.warn('Request to create a conversation returned an error, continuing to wait for cookie:', e);
+      console.warn('Unable to open widget to trigger conversation:', e);
     }
 
-    return await waitForCookie('cw_conversation', { timeout: 8000, interval: 150 });
+    const cw = await waitForCookie('cw_conversation', { timeout: 10000, interval: 150 });
+
+    try {
+      window.$chatwoot.toggle('close');
+    } catch (_) {}
+
+    return cw;
   }
 
   async function openChatwoot() {
     try {
       const cw = await ensureConversationCookie();
 
-      const resp = await fetch('https://aibotv3-nr-5728-68e1c21ad94e811100000001.ubos-ksbve.ubos.tech/send-message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cw_conversation: cw }),
-      });
+      // 2) шлём в Node-RED
+      const resp = await fetch(
+        'https://aibotv3-nr-5728-68e1c21ad94e811100000001.ubos-ksbve.ubos.tech/send-message',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cw_conversation: cw }),
+        }
+      );
 
-      if (resp.status !== 200) {
+    if (resp.status !== 200) {
         const text = await resp.text().catch(() => '');
         throw new Error(`The service returned error`);
       }
 
-      if (window.$chatwoot && typeof window.$chatwoot.toggle === 'function') {
-        window.$chatwoot.toggle('open');
-      } else {
-        console.warn('Chatwoot is not ready yet. We will try to open it after the readiness event.');
-        window.addEventListener('chatwoot:ready', () => window.$chatwoot.toggle('open'), { once: true });
-      }
+      await waitForChatwootReady();
+      window.$chatwoot.toggle('open');
+
     } catch (err) {
-      console.error('Unable to open chat in chain (cookie → POST → open):', err);
+      console.error('Chain failed (cookie → POST → open):', err);
       if (window.$chatwoot && typeof window.$chatwoot.toggle === 'function') {
         window.$chatwoot.toggle('open');
       }
     }
   }
+         
       (function(d,t) {
         var BASE_URL="https://uboschat-4382-68e1c21ad94e811100000001.ubos-ksbve.ubos.tech";
         var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
