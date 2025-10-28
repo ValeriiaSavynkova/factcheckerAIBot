@@ -2,8 +2,15 @@
 <html>
   <body>
     <h1>Hello World</h1>
-   <button class="cw-btn" onclick="openChatwoot()">Open chat</button>
-
+<div>
+  <button class="cw-btn" onclick="openChatwoot('Що ти вмієш?')">Що ти вмієш?</button>
+</div>
+<div>
+  <button class="cw-btn" onclick="openChatwoot('Як справи?')">Як справи?</button>
+</div>
+<div>
+  <button class="cw-btn" onclick="openChatwoot('Як тебе звати?')">Як тебе звати?</button>
+</div>
 <script>
   function getCookie(name) {
     const m = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([$?*|{}\]\\^])/g, '\\$1') + '=([^;]*)'));
@@ -56,7 +63,7 @@ function waitForChatwootReady({ timeout = 10000 } = {}) {
     return cw;
   }
 
-  async function openChatwoot() {
+  async function openChatwoot(messageText) {
     try {
       const cw = await ensureConversationCookie();
 
@@ -66,7 +73,7 @@ function waitForChatwootReady({ timeout = 10000 } = {}) {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ cw_conversation: cw }),
+          body: JSON.stringify({ cw_conversation: cw, text: String(messageText || '') }),
         }
       );
 
