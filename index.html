@@ -67,13 +67,14 @@
 
         try {
           window.$chatwoot.toggle('open');
+          window.$chatwoot.toggle('close');
         } catch (_) {
         }
 
         const cw = await waitForCookie('cw_conversation');
-        try {
-          window.$chatwoot.toggle('close');
-        } catch (_) {}
+        // try {
+        //   window.$chatwoot.toggle('close');
+        // } catch (_) {}
 
         return cw;
       }
@@ -94,6 +95,8 @@
           }
 
           await ensureChatwootReady();
+          window.$chatwoot.toggle('open');
+          window.$chatwoot.toggle('close');
           window.$chatwoot.toggle('open');
         } catch (err) {
           console.error('sendPresetToChatwoot failed:', err);
