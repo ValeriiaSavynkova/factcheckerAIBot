@@ -61,13 +61,20 @@
 
       async function ensureCwConversation() {
         const existing = getCookie('cw_conversation');
-        if (existing) return existing; 
+        if (existing) {
+          console.log('cw_conversation exists');
+          return existing; 
+        }
 
         await ensureChatwootReady();
+        console.log('ready')
 
         try {
           window.$chatwoot.toggle('open');
+          console.log('open');
           window.$chatwoot.toggle('close');
+          console.log('close');
+
         } catch (_) {
         }
 
@@ -95,6 +102,7 @@
           }
 
           window.$chatwoot.toggle('open');
+          console.log('final open');
           // window.$chatwoot.toggle('close');
           // window.$chatwoot.toggle('open');
         } catch (err) {
