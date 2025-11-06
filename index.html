@@ -2,7 +2,110 @@
 <html>
   <body>
     <h1>Hello World</h1>
+     <div>
+      <button class="cw-btn" onclick="sendPresetToChatwoot('Що ти вмієш?')">
+        Що ти вмієш?
+      </button>
+    </div>
+    <div>
+      <button class="cw-btn" onclick="sendPresetToChatwoot('Як справи?')">
+        Як справи?
+      </button>
+    </div>
+    <div>
+      <button class="cw-btn" onclick="sendPresetToChatwoot('Як тебе звати?')">
+        Як тебе звати?
+      </button>
+    </div>
 <script>
+  function getCookie(name) { 
+    const m = document.cookie.match( 
+      new RegExp( 
+        '(?:^|; )' + name.replace(/([$?*|{}\]\\^])/g, '\\$1') + '=([^;]*)' 
+      ) 
+    ); 
+    return m ? decodeURIComponent(m[1]) : null; 
+  }
+
+  function onChatwootReady({ timeout = 10000 } = {}) {
+        return new Promise((resolve, reject) => {
+          if (window.$chatwoot && typeof window.$chatwoot.toggle === 'function') {
+            resolve();
+            return;
+          }
+          const handler = () => {
+            window.removeEventListener('chatwoot:ready', handler);
+            resolve();
+          };
+          window.addEventListener('chatwoot:ready', handler, { once: true });
+          setTimeout(() => {
+            window.removeEventListener('chatwoot:ready', handler);
+            reject(new Error('chatwoot:ready timeout'));
+          }, timeout);
+        });
+      }
+
+      function waitForCookie(name, { timeout = 8000, interval = 125 } = {}) {
+        return new Promise((resolve, reject) => {
+          const started = Date.now();
+          const timer = setInterval(() => {
+            const val = getCookie(name);
+            if (val) {
+              clearInterval(timer);
+              resolve(val);
+            } else if (Date.now() - started > timeout) {
+              clearInterval(timer);
+              reject(new Error(`No cookie ${name} within ${timeout}ms`));
+            }
+          }, interval);
+        });
+      }
+
+      async function ensureCwConversation() {
+        const existing = getCookie('cw_conversation');
+        if (existing) return existing; 
+
+        await onChatwootReady();
+
+        try {
+          window.$chatwoot.toggle('open');
+        } catch (_) {
+        }
+
+        const cw = await waitForCookie('cw_conversation');
+        try {
+          window.$chatwoot.toggle('close');
+        } catch (_) {}
+
+        return cw;
+      }
+
+      // ===== функция для кнопок =====
+      async function sendPresetToChatwoot(messageText) {
+        try {
+          const cw = await ensureCwConversation();
+
+          if (messageText) {
+            await fetch(
+              'https://aibotv3-nr-5728-68e1c21ad94e811100000001.ubos-ksbve.ubos.tech/send-message',
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cw_conversation: cw, text_message: String(messageText) }),
+              }
+            ).catch(() => {}); 
+          }
+
+          await onChatwootReady();
+          window.$chatwoot.toggle('open');
+        } catch (err) {
+          console.error('sendPresetToChatwoot failed:', err);
+          if (window.$chatwoot && typeof window.$chatwoot.toggle === 'function') {
+            window.$chatwoot.toggle('open');
+          }
+        }
+      }
+  
     (function(d,t) {
         var BASE_URL="https://uboschat-4382-68e1c21ad94e811100000001.ubos-ksbve.ubos.tech";
         var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
