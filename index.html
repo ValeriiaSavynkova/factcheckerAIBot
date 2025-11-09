@@ -18,100 +18,200 @@
       </button>
     </div>
 <script>
-  function getCookie(name) { 
-    const m = document.cookie.match( 
-      new RegExp( 
-        '(?:^|; )' + name.replace(/([$?*|{}\]\\^])/g, '\\$1') + '=([^;]*)' 
-      ) 
-    ); 
-    return m ? decodeURIComponent(m[1]) : null; 
-  }
+  // function getCookie(name) { 
+  //   const m = document.cookie.match( 
+  //     new RegExp( 
+  //       '(?:^|; )' + name.replace(/([$?*|{}\]\\^])/g, '\\$1') + '=([^;]*)' 
+  //     ) 
+  //   ); 
+  //   return m ? decodeURIComponent(m[1]) : null; 
+  // }
 
-     function ensureChatwootReady(opts) {
-        const timeout = (opts && opts.timeout) || 10000;
-        const interval = (opts && opts.interval) || 100;
-        return new Promise((resolve, reject) => {
-          const ready = () => (window.$chatwoot && typeof window.$chatwoot.toggle === 'function');
-          if (ready()) return resolve();
-          const start = Date.now();
-          const t = setInterval(() => {
-            if (ready()) { clearInterval(t); resolve(); return; }
-            if (Date.now() - start > timeout) { clearInterval(t); reject(new Error('Chatwoot not ready within timeout')); }
-          }, interval);
-        });
-      }
+  //    function ensureChatwootReady(opts) {
+  //       const timeout = (opts && opts.timeout) || 10000;
+  //       const interval = (opts && opts.interval) || 100;
+  //       return new Promise((resolve, reject) => {
+  //         const ready = () => (window.$chatwoot && typeof window.$chatwoot.toggle === 'function');
+  //         if (ready()) return resolve();
+  //         const start = Date.now();
+  //         const t = setInterval(() => {
+  //           if (ready()) { clearInterval(t); resolve(); return; }
+  //           if (Date.now() - start > timeout) { clearInterval(t); reject(new Error('Chatwoot not ready within timeout')); }
+  //         }, interval);
+  //       });
+  //     }
   
-      function waitForCookie(name, opts) {
-        const timeout = (opts && opts.timeout) || 8000;
-        const interval = (opts && opts.interval) || 125;
-        return new Promise((resolve, reject) => {
-          const started = Date.now();
-          const timer = setInterval(() => {
-            const val = getCookie(name);
-            if (val) {
-              clearInterval(timer);
-              resolve(val);
-            } else if (Date.now() - started > timeout) {
-              clearInterval(timer);
-              reject(new Error(`No cookie ${name} within ${timeout}ms`));
-            }
-          }, interval);
-        });
+  //     function waitForCookie(name, opts) {
+  //       const timeout = (opts && opts.timeout) || 8000;
+  //       const interval = (opts && opts.interval) || 125;
+  //       return new Promise((resolve, reject) => {
+  //         const started = Date.now();
+  //         const timer = setInterval(() => {
+  //           const val = getCookie(name);
+  //           if (val) {
+  //             clearInterval(timer);
+  //             resolve(val);
+  //           } else if (Date.now() - started > timeout) {
+  //             clearInterval(timer);
+  //             reject(new Error(`No cookie ${name} within ${timeout}ms`));
+  //           }
+  //         }, interval);
+  //       });
+  //     }
+
+  //     async function ensureCwConversation() {
+  //       const existing = getCookie('cw_conversation');
+  //       if (existing) {
+  //         console.log('cw_conversation exists');
+  //         return existing; 
+  //       }
+
+  //       await ensureChatwootReady();
+  //       console.log('ready')
+
+  //       try {
+  //         window.$chatwoot.toggle('open');
+  //         console.log('open');
+  //         window.$chatwoot.toggle('close');
+  //         console.log('close');
+
+  //       } catch (_) {
+  //       }
+
+  //       const cw = await waitForCookie('cw_conversation');
+  //       // try {
+  //       //   window.$chatwoot.toggle('close');
+  //       // } catch (_) {}
+
+  //       return cw;
+  //     }
+
+  //     async function sendPresetToChatwoot(messageText) {
+  //       try {
+  //         const cw = await ensureCwConversation();
+
+  //         if (messageText) {
+  //           await fetch(
+  //             'https://aibotv3-nr-5728-68e1c21ad94e811100000001.ubos-ksbve.ubos.tech/send-message',
+  //             {
+  //               method: 'POST',
+  //               headers: { 'Content-Type': 'application/json' },
+  //               body: JSON.stringify({ cw_conversation: cw, text_message: String(messageText) }),
+  //             }
+  //           ).catch(() => {}); 
+  //         }
+
+  //         window.$chatwoot.toggle('open');
+  //         console.log('final open');
+  //         // window.$chatwoot.toggle('close');
+  //         // window.$chatwoot.toggle('open');
+  //       } catch (err) {
+  //         console.error('sendPresetToChatwoot failed:', err);
+  //         if (window.$chatwoot && typeof window.$chatwoot.toggle === 'function') {
+  //           window.$chatwoot.toggle('open');
+  //         }
+  //       }
+  //     }
+  function getCookie(name) {
+  const m = document.cookie.match(
+    new RegExp(
+      '(?:^|; )' + name.replace(/([$?*|{}\]\\^])/g, '\\$1') + '=([^;]*)'
+    )
+  );
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+// Wait until Chatwoot is ready (window.$chatwoot.toggle is available).
+function ensureChatwootReady() {
+  return new Promise((resolve, reject) => {
+    const ready = () =>
+      window.$chatwoot && typeof window.$chatwoot.toggle === 'function';
+    if (ready()) return resolve();
+    const start = Date.now();
+    const t = setInterval(() => {
+      if (ready()) {
+        clearInterval(t);
+        resolve();
+        return;
       }
-
-      async function ensureCwConversation() {
-        const existing = getCookie('cw_conversation');
-        if (existing) {
-          console.log('cw_conversation exists');
-          return existing; 
-        }
-
-        await ensureChatwootReady();
-        console.log('ready')
-
-        try {
-          window.$chatwoot.toggle('open');
-          console.log('open');
-          window.$chatwoot.toggle('close');
-          console.log('close');
-
-        } catch (_) {
-        }
-
-        const cw = await waitForCookie('cw_conversation');
-        // try {
-        //   window.$chatwoot.toggle('close');
-        // } catch (_) {}
-
-        return cw;
+      if (Date.now() - start > 5000) {
+        clearInterval(t);
+        reject(new Error('Chatwoot not ready within timeout'));
       }
+    }, 100);
+  });
+}
 
-      async function sendPresetToChatwoot(messageText) {
-        try {
-          const cw = await ensureCwConversation();
-
-          if (messageText) {
-            await fetch(
-              'https://aibotv3-nr-5728-68e1c21ad94e811100000001.ubos-ksbve.ubos.tech/send-message',
-              {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ cw_conversation: cw, text_message: String(messageText) }),
-              }
-            ).catch(() => {}); 
-          }
-
-          window.$chatwoot.toggle('open');
-          console.log('final open');
-          // window.$chatwoot.toggle('close');
-          // window.$chatwoot.toggle('open');
-        } catch (err) {
-          console.error('sendPresetToChatwoot failed:', err);
-          if (window.$chatwoot && typeof window.$chatwoot.toggle === 'function') {
-            window.$chatwoot.toggle('open');
-          }
-        }
+// Wait until a specific cookie appears (cw_conversation).
+function waitForCookie(name) {
+  return new Promise((resolve, reject) => {
+    const started = Date.now();
+    const timer = setInterval(() => {
+      const val = getCookie(name);
+      if (val) {
+        clearInterval(timer);
+        resolve(val);
+      } else if (Date.now() - started > 8000) {
+        clearInterval(timer);
+        reject(new Error(`No cookie ${name} within 8000 ms`));
       }
+    }, 100);
+  });
+}
+
+// Ensure cw_conversation cookie exists.
+// 1. If it already exists, return it.
+// 2. If not:
+//    - wait for Chatwoot to be ready,
+//    - open the widget to trigger conversation & cookie creation,
+//    - close the widget so the user doesn't see it too early,
+//    - wait for cw_conversation cookie.
+async function ensureCwConversation() {
+  const existing = getCookie('cw_conversation');
+  if (existing) {
+    return existing;
+  }
+  await ensureChatwootReady();
+  try {
+    window.$chatwoot.toggle('open');
+    window.$chatwoot.toggle('close');
+  } catch (_) {}
+  const cw = await waitForCookie('cw_conversation');
+  return cw;
+}
+
+//  Main handler function
+// This function should be attached to onclick / onClick.
+async function chatButtonClickHandler(messageText) {
+  try {
+    const cw = await ensureCwConversation();
+    if (messageText) {
+      await fetch(
+        'https://aibotv3-nr-5728-68e1c21ad94e811100000001.ubos-ksbve.ubos.tech/send-message',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cw_conversation: cw,
+            text_message: String(messageText),
+          }),
+        }
+      ).catch(() => {});
+    }
+
+    // Open → close → open to ensure the actual conversation is visible.
+    window.$chatwoot.toggle('open');
+    window.$chatwoot.toggle('close');
+    window.$chatwoot.toggle('open');
+  } catch (err) {
+    console.error('chatButtonClickHandler failed:', err);
+
+    // Fallback: at least try to open the widget.
+    if (window.$chatwoot && typeof window.$chatwoot.toggle === 'function') {
+      window.$chatwoot.toggle('open');
+    }
+  }
+}
 </script>
     <script>
     (function(d,t) {
