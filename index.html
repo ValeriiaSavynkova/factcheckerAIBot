@@ -18,24 +18,48 @@
     }
   })(document,"script");
 </script>
-    <script>
-
-  const currentUser =  {
+  <script>
+  const currentUser = {
     id: "12345",
     name: "Валерія",
     email: "savyn@example.com",
-    phone_number: "+79990000000"
+    phone_number: "+79990000000",
   };
 
-  window.addEventListener("chatwoot:ready", function () {
+  function applyChatwootUser() {
+    if (!window.$chatwoot) return false;
+
+    console.log("Applying Chatwoot user", currentUser);
+
+    window.$chatwoot.setUser(String(currentUser.id), {
+      email: currentUser.email,
+      phone_number: currentUser.phone_number,
+    });
+
     window.$chatwoot.setCustomAttributes({
-      user_id: currentUser.id,
+      user_id: String(currentUser.id),
       user_name: currentUser.name,
       user_email: currentUser.email,
-      user_phone_number: phone_number
+      user_phone_number: currentUser.phone_number,
     });
-    </script>
 
+    return true;
+  }
+
+  window.addEventListener("chatwoot:ready", function () {
+    console.log("chatwoot:ready fired", !!window.$chatwoot);
+
+    // пробуем сразу
+    if (applyChatwootUser()) return;
+
+    // если $chatwoot ещё не появился — ретраи
+    let tries = 0;
+    const t = setInterval(() => {
+      tries++;
+      if (applyChatwootUser() || tries > 20) clearInterval(t);
+    }, 250);
+  });
+</script>
     </body>
 </html>
 
