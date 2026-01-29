@@ -3,20 +3,39 @@
   <body>
     <h1>Hello World</h1>
 <script>
+
+  const currentUser =  {
+    id: "12345",
+    name: "Валерія",
+    email: "savyn@example.com",
+    phone_number: "+79990000000"
+  };
+
+  window.addEventListener("chatwoot:ready", function () {
+    window.$chatwoot.setCustomAttributes({
+      user_id: currentUser.id,
+      user_name: currentUser.name,
+      user_email: currentUser.email,
+      user_phone_number: phone_number
+    });
+
   (function(d,t) {
-    var BASE_URL="http://localhost:3000";
-    var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+    var BASE_URL="https://uboschat-9694-693c0e8aecafd21100000227.dev.ubos.tech";
+    var g=d.createElement(t), s=d.getElementsByTagName(t)[0];
     g.src=BASE_URL+"/packs/js/sdk.js";
+    g.defer = true;
     g.async = true;
     s.parentNode.insertBefore(g,s);
+
     g.onload=function(){
       window.chatwootSDK.run({
-        websiteToken: 'rhAb3hdEoFP2FJVXHU96pBWH',
+        websiteToken: 'PcQRGwvHWPAVv6zYaDKX9DE2',
         baseUrl: BASE_URL
-      })
-    }
+      });
+    };
   })(document,"script");
 </script>
+
 
 
     </body>
