@@ -3,6 +3,22 @@
   <body>
     <h1>Hello World</h1>
 <script>
+  (function(d,t) {
+    var BASE_URL="https://uboschat-9694-693c0e8aecafd21100000227.dev.ubos.tech";
+    var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+    g.src=BASE_URL+"/packs/js/sdk.js";
+    g.defer = true;
+    g.async = true;
+    s.parentNode.insertBefore(g,s);
+    g.onload=function(){
+      window.chatwootSDK.run({
+        websiteToken: 'PcQRGwvHWPAVv6zYaDKX9DE2',
+        baseUrl: BASE_URL
+      })
+    }
+  })(document,"script");
+</script>
+    <script>
 
   const currentUser =  {
     id: "12345",
@@ -18,25 +34,7 @@
       user_email: currentUser.email,
       user_phone_number: phone_number
     });
-
-  (function(d,t) {
-    var BASE_URL="https://uboschat-9694-693c0e8aecafd21100000227.dev.ubos.tech";
-    var g=d.createElement(t), s=d.getElementsByTagName(t)[0];
-    g.src=BASE_URL+"/packs/js/sdk.js";
-    g.defer = true;
-    g.async = true;
-    s.parentNode.insertBefore(g,s);
-
-    g.onload=function(){
-      window.chatwootSDK.run({
-        websiteToken: 'PcQRGwvHWPAVv6zYaDKX9DE2',
-        baseUrl: BASE_URL
-      });
-    };
-  })(document,"script");
-</script>
-
-
+    </script>
 
     </body>
 </html>
