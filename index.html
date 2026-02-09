@@ -6,7 +6,23 @@
     <button id="chatBtn" type="button">Написати в чат</button>
 
     <input id="msgInput" type="text" placeholder="Текст повідомлення" value="Привіт! Потрібна допомога" />
-
+<!-- Meta Pixel Code -->
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', 'ВАШ_PIXEL_ID');
+      fbq('track', 'PageView');
+    </script>
+    <noscript>
+      <img height="1" width="1" style="display:none"
+           src="https://www.facebook.com/tr?id=1247781543925591&ev=PageView&noscript=1"/>
+    </noscript>
 <script>
   (function(d,t) {
     var BASE_URL="https://uboschat-9694-693c0e8aecafd21100000227.dev.ubos.tech";
@@ -181,6 +197,20 @@ async function chatButtonClickHandler(messageText) {
         const text = document.getElementById("msgInput").value;
         chatButtonClickHandler(text);
       });
+    </script>
+    <script>
+          (function () {
+        var firedKey = 'cw_lead_sent';
+
+        window.addEventListener('chatwoot:on-message', function (event) {
+          if (sessionStorage.getItem(firedKey)) return;
+          sessionStorage.setItem(firedKey, '1');
+
+          if (typeof fbq === 'function') {
+            fbq('track', 'Lead'); // или fbq('trackCustom', 'StartChat')
+          }
+        });
+      })();
     </script>
     </body>
 </html>
