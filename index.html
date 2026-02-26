@@ -2,216 +2,22 @@
 <html>
   <body>
     <h1>Hello World</h1>
-
-    <button id="chatBtn" type="button">Написати в чат</button>
-
-    <input id="msgInput" type="text" placeholder="Текст повідомлення" value="Привіт! Потрібна допомога" />
-<!-- Meta Pixel Code -->
-    <script>
-      !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s)}(window, document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', 'ВАШ_PIXEL_ID');
-      fbq('track', 'PageView');
-    </script>
-    <noscript>
-      <img height="1" width="1" style="display:none"
-           src="https://www.facebook.com/tr?id=1247781543925591&ev=PageView&noscript=1"/>
-    </noscript>
-<script>
+    
+     <script>
   (function(d,t) {
-    var BASE_URL="https://uboschat-9694-693c0e8aecafd21100000227.dev.ubos.tech";
+    var BASE_URL="http://localhost:3000";
     var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
     g.src=BASE_URL+"/packs/js/sdk.js";
-    g.defer = true;
     g.async = true;
     s.parentNode.insertBefore(g,s);
     g.onload=function(){
       window.chatwootSDK.run({
-        websiteToken: 'PcQRGwvHWPAVv6zYaDKX9DE2',
+        websiteToken: 'rhAb3hdEoFP2FJVXHU96pBWH',
         baseUrl: BASE_URL
       })
     }
   })(document,"script");
 </script>
-  <script>
-  const currentUser = {
-    id: "12345",
-    name: "Валерія",
-    email: "savyn@example.com",
-    phone_number: "+79990000000",
-    cabinet_id: "123456",
-  };
-
-  function applyChatwootUser() {
-    if (!window.$chatwoot) return false;
-
-    console.log("Applying Chatwoot user", currentUser);
-
-    window.$chatwoot.setUser(String(currentUser.id), {
-      email: currentUser.email,
-      phone_number: currentUser.phone_number,
-    });
-
-    window.$chatwoot.setCustomAttributes({
-      user_id: String(currentUser.id),
-      user_name: currentUser.name,
-      user_email: currentUser.email,
-      user_phone_number: currentUser.phone_number,
-      cabinet_id: currentUser.cabinet_id,
-    });
-
-    return true;
-  }
-
-  window.addEventListener("chatwoot:ready", function () {
-    console.log("chatwoot:ready fired", !!window.$chatwoot);
-
-    // пробуем сразу
-    if (applyChatwootUser()) return;
-
-    // если $chatwoot ещё не появился — ретраи
-    let tries = 0;
-    const t = setInterval(() => {
-      tries++;
-      if (applyChatwootUser() || tries > 20) clearInterval(t);
-    }, 250);
-  });
-</script>
-    <script>
-      // Example script for integration
-// Below is an example script that implements the logic described above.
-
-// ===== Helpers =====
-
-// Get a cookie value by name
-function getCookie(name) {
-  const m = document.cookie.match(
-    new RegExp(
-      '(?:^|; )' + name.replace(/([$?*|{}\]\\^])/g, '\\$1') + '=([^;]*)'
-    )
-  );
-  return m ? decodeURIComponent(m[1]) : null;
-}
-
-// Wait until Chatwoot is ready (window.$chatwoot.toggle is available).
-function ensureChatwootReady() {
-  return new Promise((resolve, reject) => {
-    const ready = () =>
-      window.$chatwoot && typeof window.$chatwoot.toggle === 'function';
-    if (ready()) return resolve();
-    const start = Date.now();
-    const t = setInterval(() => {
-      if (ready()) {
-        clearInterval(t);
-        resolve();
-        return;
-      }
-      if (Date.now() - start > 5000) {
-        clearInterval(t);
-        reject(new Error('Chatwoot not ready within timeout'));
-      }
-    }, 100);
-  });
-}
-
-// Wait until a specific cookie appears (cw_conversation).
-function waitForCookie(name) {
-  return new Promise((resolve, reject) => {
-    const started = Date.now();
-    const timer = setInterval(() => {
-      const val = getCookie(name);
-      if (val) {
-        clearInterval(timer);
-        resolve(val);
-      } else if (Date.now() - started > 8000) {
-        clearInterval(timer);
-        reject(new Error(`No cookie ${name} within 8000 ms`));
-      }
-    }, 100);
-  });
-}
-
-async function ensureCwConversation() {
-  const existing = getCookie('cw_conversation');
-  if (existing) {
-    return existing;
-  }
-  await ensureChatwootReady();
-
-     if (typeof applyChatwootUser === "function") {
-          applyChatwootUser();
-        }
-  try {
-    window.$chatwoot.toggle('open');
-    window.$chatwoot.toggle('close');
-  } catch (_) {}
-  const cw = await waitForCookie('cw_conversation');
-  return cw;
-}
-
-//  Main handler function
-// This function should be attached to onclick / onClick.
-async function chatButtonClickHandler(messageText) {
-  try {
-
-              await ensureChatwootReady();
-
-       if (typeof applyChatwootUser === "function") {
-            applyChatwootUser();
-          }
-    const cw = await ensureCwConversation();
-    if (messageText) {
-      await fetch(
-        'https://nodered-0231-693c0e8aecafd21100000227.dev.ubos.tech/send-message',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            cw_conversation: cw,
-            text_message: String(messageText),
-          }),
-        }
-      ).catch(() => {});
-    }
-
-    // Open → close → open to ensure the actual conversation is visible.
-    window.$chatwoot.toggle('open');
-    window.$chatwoot.toggle('close');
-    window.$chatwoot.toggle('open');
-  } catch (err) {
-    console.error('chatButtonClickHandler failed:', err);
-
-    // Fallback: at least try to open the widget.
-    if (window.$chatwoot && typeof window.$chatwoot.toggle === 'function') {
-      window.$chatwoot.toggle('open');
-    }
-  }
-}
-      document.getElementById("chatBtn").addEventListener("click", () => {
-        const text = document.getElementById("msgInput").value;
-        chatButtonClickHandler(text);
-      });
-    </script>
-    <script>
-          (function () {
-        var firedKey = 'cw_lead_sent';
-
-        window.addEventListener('chatwoot:on-message', function (event) {
-          if (sessionStorage.getItem(firedKey)) return;
-          sessionStorage.setItem(firedKey, '1');
-
-          if (typeof fbq === 'function') {
-            fbq('track', 'Lead'); // или fbq('trackCustom', 'StartChat')
-          }
-        });
-      })();
-    </script>
     </body>
 </html>
 
