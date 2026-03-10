@@ -4,21 +4,20 @@
     <h1>Hello World</h1>
     
     <script>
-  (function(d,t) {
-    var BASE_URL="http://localhost:3000";
-    var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-    g.src=BASE_URL+"/packs/js/sdk.js";
-    g.async = true;
-    s.parentNode.insertBefore(g,s);
-    g.onload=function(){
-      window.chatwootSDK.run({
-        websiteToken: 'vpCXEeFd28QUkEkqBko8huEQ',
-        baseUrl: BASE_URL
-      })
-    }
-  })(document,"script");
-</script>
-
+      (function(d,t) {
+        var BASE_URL="https://uboschat-3807-69aa96612895701100000227.ubos-7aodf.ubos.tech";
+        var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=BASE_URL+"/packs/js/sdk.js";
+        g.async = true;
+        s.parentNode.insertBefore(g,s);
+        g.onload=function(){
+          window.chatwootSDK.run({
+            websiteToken: 'ZTqpGNcM8ZixhGckBZAQJh6o',
+            baseUrl: BASE_URL
+          })
+        }
+      })(document,"script");
+    </script>
     </body>
 </html>
 
